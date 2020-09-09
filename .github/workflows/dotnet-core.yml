@@ -29,7 +29,7 @@ jobs:
       shell: bash
       run: |
           # Define some variables for things we need
-          tag=$(git describe --tags --always)
+          tag=$(git describe --tags --abbrev=0)
           release_name="LordsBotStat-$tag-win"
           # Pack files
           7z a -tzip "${release_name}.zip" "./temp/*"
