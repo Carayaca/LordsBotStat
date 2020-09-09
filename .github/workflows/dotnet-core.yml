@@ -25,7 +25,7 @@ jobs:
       run: dotnet publish -c Release -r win10-x64 -p:PublishSingleFile=true -o temp
     - name: Test
       run: dotnet test --no-restore --verbosity normal
-    - name: Build
+    - name: Pack
       shell: bash
       run: |
           # Define some variables for things we need
