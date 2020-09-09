@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Text;
 
     using LordsBotStat.Core.Dto;
@@ -34,6 +36,15 @@
 
             var files = Directory.EnumerateFiles(dirName, JsonFileMask, SearchOption.TopDirectoryOnly);
             return LoadJson(files);
+        }
+
+        [SuppressMessage("ReSharper", "StyleCop.SA1310")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static class Loot
+        {
+            public const int Level_2 = 1;
+
+            public const int Level_3 = 2;
         }
 
         /// <summary>
@@ -117,7 +128,7 @@
             foreach (var gr in players)
             {
                 // все коробки от монстров 2 уровня и выше
-                var boxes = gr.Where(box => !box.IsPurchase && box.BoxLevel >= 2)
+                var boxes = gr.Where(box => !box.IsPurchase && box.BoxLevel >= Loot.Level_2)
                     .ToArray();
 
                 var playerName = gr.Key;
@@ -131,8 +142,8 @@
                     var item = new RenderItem
                                    {
                                        PlayerName = playerName,
-                                       Lvl2 = boxes.Count(box => box.BoxLevel == 2),
-                                       Lvl3 = boxes.Count(box => box.BoxLevel >= 3),
+                                       Lvl2 = boxes.Count(box => box.BoxLevel == Loot.Level_2),
+                                       Lvl3 = boxes.Count(box => box.BoxLevel >= Loot.Level_3),
                                        Paid = gr.Count(box => box.IsPurchase)
                                    };
 
