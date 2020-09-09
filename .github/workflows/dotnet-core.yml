@@ -22,7 +22,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Publish
-      run: dotnet publish -c Release -r win10-x64 -p:PublishSingleFile=true
+      run: dotnet publish -c Release -r win10-x64 -p:PublishSingleFile=true -o temp
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Build
@@ -32,9 +32,9 @@ jobs:
           tag=$(git describe --tags --always)
           release_name="LordsBotStat-$tag-win"
           # Pack files
-          7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          7z a -tzip "${release_name}.zip" "./temp/*"
           # Delete output directory
-          rm -r "$release_name"
+          rm -r "temp"
     - name: Artifact
       uses: softprops/action-gh-release@v1
       with:
