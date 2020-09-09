@@ -25,3 +25,19 @@ jobs:
       run: dotnet publish -c Release -r win10-x64 -p:PublishSingleFile=true
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+    - name: Build
+      shell: bash
+      run: |
+          # Define some variables for things we need
+          tag=$(git describe --tags --always)
+          release_name="LordsBotStat-$tag-win"
+          # Pack files
+          7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          # Delete output directory
+          rm -r "$release_name"
+    - name: Artifact
+      uses: softprops/action-gh-release@v1
+      with:
+        files: "LordsBotStat*"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
