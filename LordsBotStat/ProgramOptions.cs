@@ -20,7 +20,7 @@
         [Value(0
             , Required = true
             , MetaName = "InputDirectory"
-            , HelpText = "Input directory")]
+            , HelpText = "Input directory with JSON reports")]
         public string InputDirectory { get; set; }
     }
 }
