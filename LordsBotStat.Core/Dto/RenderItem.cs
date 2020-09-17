@@ -1,10 +1,16 @@
-﻿namespace LordsBotStat.Core.Dto
+﻿using System;
+using System.Diagnostics;
+
+namespace LordsBotStat.Core.Dto
 {
     /// <summary>
     /// The RenderItem class.
     /// </summary>
     public class RenderItem
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private Report Report { get; }
+
         /// <summary>
         /// Gets or sets the name of the player.
         /// </summary>
@@ -42,13 +48,22 @@
         {
             get
             {
-                if (this.Score >= 14)
+                if (this.Score >= this.Report.TotalScore)
                 {
                     return 0;
                 }
 
-                return 14 - this.Score;
+                return this.Report.TotalScore - this.Score;
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RenderItem"/> class.
+        /// </summary>
+        /// <param name="report">The report.</param>
+        public RenderItem(Report report)
+        {
+            this.Report = report ?? throw new ArgumentNullException(nameof(report));
         }
     }
 }

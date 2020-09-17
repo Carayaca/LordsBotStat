@@ -9,6 +9,8 @@
     /// </summary>
     public class Report
     {
+        private const int ScorePerDay = 14;
+
         /// <summary>
         /// Gets or sets date from.
         /// </summary>
@@ -38,6 +40,18 @@
         /// Gets or sets the lazy players.
         /// </summary>
         public IReadOnlyCollection<string> LazyPlayers { get; set; } = new string[0];
+
+        /// <summary>
+        /// Gets the total score for the full period.
+        /// </summary>
+        public int TotalScore
+        {
+            get
+            {
+                var ts = this.DateTo - this.DateFrom;
+                return ts.GetValueOrDefault().Days * ScorePerDay;
+            }
+        }
 
         /// <summary>
         /// Imbue the additional guild information.

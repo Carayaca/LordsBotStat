@@ -1,4 +1,6 @@
-﻿namespace LordsBotStat
+﻿using NLog;
+
+namespace LordsBotStat
 {
     using System;
     using System.Collections.Generic;
@@ -13,6 +15,8 @@
     /// </summary>
     public static class Program
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+        
         /// <summary>
         /// Defines the entry point of the application.
         /// </summary>
@@ -28,13 +32,20 @@
 
         private static void Run(ProgramOptions options)
         {
-            var report = JsonLoader.LoadDir(options.InputDirectory);
-            if (!string.IsNullOrEmpty(options.Members))
+            try
             {
-                report.Imbue(options.Members);
-            }
+                var report = JsonLoader.LoadDir(options.InputDirectory);
+                if (!string.IsNullOrEmpty(options.Members))
+                {
+                    report.Imbue(options.Members);
+                }
 
-            View.Render(report);
+                View.Render(report, options.PlainText);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
         }
 
         private static void DisplayHelp<T>(ParserResult<T> result, IEnumerable<Error> errs)

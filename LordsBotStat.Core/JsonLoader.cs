@@ -5,22 +5,16 @@
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
-    using System.Runtime.CompilerServices;
-    using System.Text;
 
     using LordsBotStat.Core.Dto;
     using LordsBotStat.Core.JsonDto;
 
-    using Newtonsoft.Json;
-
     /// <summary>
     /// The Json loader.
     /// </summary>
-    public class JsonLoader
+    public static class JsonLoader
     {
         private const string JsonFileMask = "guild-stats-*.json";
-
-        private static readonly DateTime EpochBegin = new DateTime(1970, 1, 1);
 
         /// <summary>
         /// Loads the dir.
@@ -38,13 +32,35 @@
             return LoadJson(files);
         }
 
-        [SuppressMessage("ReSharper", "StyleCop.SA1310")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static class Loot
+        [SuppressMessage("ReSharper", "StyleCop.SA1309")]
+        private static class LootLevel
         {
-            public const int Level_2 = 1;
+            /// <summary>
+            /// LEVEL 2.
+            /// </summary>
+            public const int _2 = 1;
 
-            public const int Level_3 = 2;
+            /// <summary>
+            /// LEVEL 3.
+            /// </summary>
+            public const int _3 = 2;
+        }
+
+        private class BoxComparer : IEqualityComparer<BoxData>
+        {
+            public bool Equals(BoxData x, BoxData y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return x.Sequence == y.Sequence;
+            }
+
+            public int GetHashCode(BoxData obj)
+            {
+                return obj.Sequence;
+            }
         }
 
         /// <summary>
@@ -68,7 +84,7 @@
                 {
                     if (File.Exists(file))
                     {
-                        loot.Add(LoadJson(file));
+                        loot.Add(Json.LoadFrom<LootReport>(file));
                     }
                     else if (Directory.Exists(file))
                     {
@@ -86,22 +102,10 @@
             return loot;
         }
 
-        private static LootReport LoadJson(string fileName)
-        {
-            using (var fs = File.OpenRead(fileName))
-            using (var sr = new StreamReader(fs, Encoding.UTF8))
-            using (var jsonTextReader = new JsonTextReader(sr))
-            {
-                var serializer = new JsonSerializer();
-                var report = serializer.Deserialize<LootReport>(jsonTextReader);
-                return report;
-            }
-        }
-
         private static Report Render(ICollection<LootReport> loot)
         {
             // период за который собираем статистику
-            var interval = loot.Select(x => x.DiscardTime).Where(time => !time.Equals(EpochBegin))
+            var interval = loot.SelectMany(x => x.BoxData, (_, box) => box.RcvTime)
                 .ToArray();
 
             var report = new Report
@@ -112,11 +116,12 @@
 
             if (interval.Any())
             {
-                report.DateFrom = interval.Min();
-                report.DateTo = interval.Max();
+                report.DateFrom = interval.Min().Date;
+                report.DateTo = interval.Max().AddDays(1).Date;
             }
 
             var players = loot.SelectMany(p => p.BoxData)
+                .Distinct(new BoxComparer())
                 .GroupBy(box => box.PlayerName)
                 .OrderBy(gr => gr.Key)
                     .ToArray();
@@ -128,7 +133,7 @@
             foreach (var gr in players)
             {
                 // все коробки от монстров 2 уровня и выше
-                var boxes = gr.Where(box => !box.IsPurchase && box.BoxLevel >= Loot.Level_2)
+                var boxes = gr.Where(box => !box.IsPurchase && box.BoxLevel >= LootLevel._2)
                     .ToArray();
 
                 var playerName = gr.Key;
@@ -139,11 +144,11 @@
 
                 if (boxes.Any())
                 {
-                    var item = new RenderItem
+                    var item = new RenderItem(report)
                                    {
                                        PlayerName = playerName,
-                                       Lvl2 = boxes.Count(box => box.BoxLevel == Loot.Level_2),
-                                       Lvl3 = boxes.Count(box => box.BoxLevel >= Loot.Level_3),
+                                       Lvl2 = boxes.Count(box => box.BoxLevel == LootLevel._2),
+                                       Lvl3 = boxes.Count(box => box.BoxLevel >= LootLevel._3),
                                        Paid = gr.Count(box => box.IsPurchase)
                                    };
 

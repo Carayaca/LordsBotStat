@@ -30,18 +30,18 @@
                 }
 
                 var theWorksheet = ((WorksheetPart) doc.WorkbookPart.GetPartById(first.Id)).Worksheet;
-                var data = theWorksheet.GetFirstChild<SheetData>();
+                var sheetData = theWorksheet.GetFirstChild<SheetData>();
 
-                foreach (var openXmlElement in data)
+                foreach (var openXmlElement in sheetData)
                 {
                     var r = (Row) openXmlElement;
-
                     if (r.RowIndex.Value == 1) // пропустим Header
                     {
                         continue;
                     }
 
-                    var cell = r.Elements<Cell>().ToArray()[1]; // ячейка с ником игрока
+                    var cells = r.Elements<Cell>().ToArray();
+                    var cell = cells.Length > 0 ? cells[1] : null; // ячейка с ником игрока
 
                     if (cell?.InnerText.Any() ?? false)
                     {

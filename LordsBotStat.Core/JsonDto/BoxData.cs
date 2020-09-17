@@ -22,7 +22,7 @@
         /// Gets or sets the sequence.
         /// </summary>
         [JsonProperty("SN")]
-        public int Sequence { get; set; }
+        public int Sequence { get; private set; }
 
         /// <summary>
         /// Gets or sets the status.
@@ -38,11 +38,11 @@
         public DateTime RcvTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the box item identifier.
+        /// Gets the box item identifier.
         /// </summary>
         [JsonProperty("BoxItemID")]
 
-        public int BoxItemId { get; set; }
+        public int BoxItemId { get; private set; }
 
         /// <summary>
         /// Gets or sets the name of the player.
@@ -51,10 +51,10 @@
         public string PlayerName { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is purchase.
+        /// Gets or sets a value indicating whether this box is purchase.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance is purchase; otherwise, <c>false</c>.
+        ///   <c>true</c> if this box is purchase; otherwise, <c>false</c>.
         /// </value>
         [JsonProperty("isPurchase")]
         public bool IsPurchase { get; set; }
@@ -83,14 +83,7 @@
             get
             {
                 var sb = new StringBuilder();
-                if (string.IsNullOrEmpty(this.PlayerName))
-                {
-                    sb.AppendFormat("{0}, ", "<Аноним>");
-                }
-                else
-                {
-                    sb.AppendFormat("{0}, ", this.PlayerName);
-                }
+                sb.AppendFormat("{0}, ", string.IsNullOrEmpty(this.PlayerName) ? "<Аноним>" : this.PlayerName);
 
                 if (this.IsPurchase)
                 {
@@ -99,14 +92,7 @@
                 else
                 {
                     var m = RxMonsterLoot.Match(this.BoxName);
-                    if (m.Success)
-                    {
-                        sb.AppendFormat("{0}", m.Groups["Name"].Value);
-                    }
-                    else
-                    {
-                        sb.AppendFormat("{0}", this.BoxName);
-                    }
+                    sb.AppendFormat("{0}", m.Success ? m.Groups["Name"].Value : this.BoxName);
                 }
 
                 sb.Append(", ");

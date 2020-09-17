@@ -2,7 +2,7 @@
   "profiles": {
     "LordsBotStat": {
       "commandName": "Project",
-      "commandLineArgs": "JsonData --members DnD-09.09.2020.xlsx"
+      "commandLineArgs": "JsonData --members DnD-09.17.2020.xlsx --plain-text"
     }
   }
 }

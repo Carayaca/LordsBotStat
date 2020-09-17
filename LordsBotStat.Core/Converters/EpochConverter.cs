@@ -5,7 +5,7 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// The epoch converter.
+    /// The epoch time converter to/from <see cref="DateTime"/>.
     /// </summary>
     /// <seealso cref="JsonConverter{DateTime}" />
     internal class EpochConverter : JsonConverter<DateTime>
