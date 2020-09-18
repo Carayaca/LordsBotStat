@@ -1,4 +1,7 @@
-﻿namespace LordsBotStat.Core
+﻿using System;
+using System.IO;
+
+namespace LordsBotStat.Core
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -9,49 +12,49 @@
     /// <summary>
     /// The GuildLoader class.
     /// </summary>
-    public class GuildLoader
+    public static class GuildLoader
     {
         /// <summary>
         /// Loads the members list.
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
         /// <returns>IList{string}.</returns>
-        public IList<string> LoadMembersList(string fileName)
+        public static IList<string> LoadMembersList(string fileName)
         {
             IList<string> players = new List<string>();
 
-            using (var doc = SpreadsheetDocument.Open(fileName, false))
+            try
             {
-                var sheets = doc.WorkbookPart.Workbook.GetFirstChild<Sheets>();
-                var first = sheets.Descendants<Sheet>().FirstOrDefault(sh => sh.Name == "Sheet");
-                if (first == null)
+                using (var doc = SpreadsheetDocument.Open(fileName, false))
                 {
-                    return players;
-                }
-
-                var theWorksheet = ((WorksheetPart) doc.WorkbookPart.GetPartById(first.Id)).Worksheet;
-                var sheetData = theWorksheet.GetFirstChild<SheetData>();
-
-                foreach (var openXmlElement in sheetData)
-                {
-                    var r = (Row) openXmlElement;
-                    if (r.RowIndex.Value == 1) // пропустим Header
+                    var sheets = doc.WorkbookPart.Workbook.GetFirstChild<Sheets>();
+                    var first = sheets.Descendants<Sheet>().FirstOrDefault(sh => sh.Name == "Sheet");
+                    if (first == null)
                     {
-                        continue;
+                        return players;
                     }
 
-                    var cells = r.Elements<Cell>().ToArray();
-                    var cell = cells.Length > 0 ? cells[1] : null; // ячейка с ником игрока
+                    var theWorksheet = ((WorksheetPart) doc.WorkbookPart.GetPartById(first.Id)).Worksheet;
+                    var sheetData = theWorksheet.GetFirstChild<SheetData>();
 
-                    if (cell?.InnerText.Any() ?? false)
+                    foreach (var openXmlElement in sheetData)
                     {
-                        if (cell.DataType != null)
+                        var r = (Row) openXmlElement;
+                        if (r.RowIndex.Value == 1) // пропустим Header
                         {
-                            switch (cell.DataType.Value)
+                            continue;
+                        }
+
+                        var cells = r.Elements<Cell>().ToArray();
+                        var cell = cells.Length > 0 ? cells[1] : null; // ячейка с ником игрока
+
+                        if (cell?.InnerText.Any() ?? false)
+                        {
+                            switch (cell.DataType?.Value)
                             {
                                 case CellValues.SharedString:
                                     var stringTable = doc.WorkbookPart.GetPartsOfType<SharedStringTablePart>()
-                                            .FirstOrDefault();
+                                        .FirstOrDefault();
                                     if (stringTable != null)
                                     {
                                         var value =
@@ -64,6 +67,10 @@
                         }
                     }
                 }
+            }
+            catch (InvalidDataException)
+            {
+                // ignored
             }
 
             return players;

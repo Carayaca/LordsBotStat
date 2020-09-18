@@ -39,7 +39,7 @@
         /// <summary>
         /// Gets or sets the lazy players.
         /// </summary>
-        public IReadOnlyCollection<string> LazyPlayers { get; set; } = new string[0];
+        public IReadOnlyCollection<string> LazyPlayers { get; private set; } = new string[0];
 
         /// <summary>
         /// Gets the total score for the full period.
@@ -61,7 +61,7 @@
         {
             try
             {
-                var members = new GuildLoader().LoadMembersList(fileName);
+                var members = GuildLoader.LoadMembersList(fileName);
                 this.LazyPlayers = members.Except(this.Items.Select(item => item.PlayerName))
                     .ToList();
             }
