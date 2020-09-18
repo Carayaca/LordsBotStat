@@ -118,7 +118,13 @@ namespace LordsBotStatView
                 this.dataGridView1.DataSource = null;
                 this.txtPlayerName.Text = string.Empty;
 
-                this.bindingSource1.DataSource = ToDataTable(this.report.Items);
+                var items = new List<RenderItem>(this.report.Items);
+                items.AddRange(this.report.LazyPlayers.Select(lazyPlayer => new RenderItem(this.report)
+                                                                                {
+                                                                                    PlayerName = lazyPlayer
+                                                                                }));
+
+                this.bindingSource1.DataSource = ToDataTable(items);
                 this.bindingSource1.Filter = null;
             
                 this.dataGridView1.DataSource = this.bindingSource1;
@@ -159,6 +165,12 @@ namespace LordsBotStatView
 
                 row.Cells[nameof(this.colRequired)].Value = this.report.TotalScore;
                 row.Cells[nameof(this.colRequired)].Style.ForeColor = Color.DarkOrange;
+
+                o = row.Cells[nameof(this.colScore)].Value;
+                if (o.Equals(0))
+                {
+                    row.Cells[nameof(this.colScore)].Style.ForeColor = Color.Red;
+                }
             }
         }
 
