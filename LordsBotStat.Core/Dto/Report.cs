@@ -1,14 +1,19 @@
-﻿namespace LordsBotStat.Core.Dto
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
+using NLog;
+
+namespace LordsBotStat.Core.Dto
+{
     /// <summary>
     /// The Report class.
     /// </summary>
     public class Report
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+
         private const int ScorePerDay = 14;
 
         /// <summary>
@@ -61,9 +66,11 @@
         {
             try
             {
+                Log.Debug("Update members list from {file}", Path.GetFileName(fileName));
                 var members = GuildLoader.LoadMembersList(fileName);
                 this.LazyPlayers = members.Except(this.Items.Select(item => item.PlayerName))
                     .ToList();
+                Log.Debug("Loaded {N} members", this.LazyPlayers.Count);
             }
             catch (Exception)
             {

@@ -1,4 +1,7 @@
-﻿using NLog;
+﻿using System.Diagnostics;
+using System.Reflection;
+
+using NLog;
 
 namespace LordsBotStat
 {
@@ -23,11 +26,18 @@ namespace LordsBotStat
         /// <param name="args">The arguments.</param>
         public static void Main(string[] args)
         {
-            var parser = new Parser(with => with.HelpWriter = null);
-            var parserResult = parser.ParseArguments<ProgramOptions>(args);
+            try
+            {
+                var parser = new Parser(with => with.HelpWriter = null);
+                var parserResult = parser.ParseArguments<ProgramOptions>(args);
 
-            var r1 = parserResult.WithParsed(Run);
-            parserResult.WithNotParsed(errs => DisplayHelp(r1, errs));
+                var r1 = parserResult.WithParsed(Run);
+                parserResult.WithNotParsed(errs => DisplayHelp(r1, errs));
+            }
+            finally
+            {
+                LogManager.Shutdown();
+            }
         }
 
         private static void Run(ProgramOptions options)

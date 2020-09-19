@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,18 @@ namespace LordsBotStatView
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
-        private Report report;
+        private int totalScore;
+
+        private static string ApplicationPath
+        {
+            get
+            {
+                using (var processModule = Process.GetCurrentProcess().MainModule)
+                {
+                    return Path.GetDirectoryName(processModule?.FileName);
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Form1"/> class.
@@ -28,11 +40,13 @@ namespace LordsBotStatView
         {
             this.InitializeComponent();
             this.dataGridView1.AutoGenerateColumns = false;
+
+            Log.Debug("Application started.");
+            Log.Debug("Application path: {path}", Application.ExecutablePath);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.LoadMembersList();
         }
 
         private static DataTable ToDataTable<T>(IEnumerable<T> items)
@@ -45,9 +59,11 @@ namespace LordsBotStatView
             foreach (var prop in props)
             {
                 //Defining type of data column gives proper data table 
-                var type = prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>)
+                var type = prop.PropertyType.IsGenericType
+                           && prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>)
                                ? Nullable.GetUnderlyingType(prop.PropertyType)
                                : prop.PropertyType;
+
                 //Setting column names as Property names
                 // ReSharper disable once AssignNullToNotNullAttribute
                 dataTable.Columns.Add(prop.Name, type);
@@ -106,20 +122,27 @@ namespace LordsBotStatView
             this.DoColors();
         }
 
-        private void Bind(Report r)
+        private void Bind(Report report)
         {
             try
             {
-                this.report = r;
-                this.LoadMembersList();
+                var membersExcelFile = Directory.EnumerateFiles(ApplicationPath, "*.xlsx")
+                    .FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(membersExcelFile))
+                {
+                    report.Imbue(membersExcelFile);
+                }
+
+                this.totalScore = report.TotalScore;
 
                 this.SuspendLayout();
 
                 this.dataGridView1.DataSource = null;
                 this.txtPlayerName.Text = string.Empty;
 
-                var items = new List<RenderItem>(this.report.Items);
-                items.AddRange(this.report.LazyPlayers.Select(lazyPlayer => new RenderItem(this.report)
+                var items = new List<RenderItem>(report.Items);
+                items.AddRange(report.LazyPlayers.Select(lazyPlayer => new RenderItem(report)
                                                                                 {
                                                                                     PlayerName = lazyPlayer
                                                                                 }));
@@ -133,19 +156,23 @@ namespace LordsBotStatView
                 this.panel1.Visible = false;
                 this.panel2.Visible = true;
 
-                for (int i = 1; i < dataGridView1.Columns.Count - 1; i++)
+                for (var i = 1; i < this.dataGridView1.Columns.Count - 1; i++)
                 {
-                    dataGridView1.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                    this.dataGridView1.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 }
-                dataGridView1.Columns[dataGridView1.Columns.Count - 1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                for (int i = 1; i < dataGridView1.Columns.Count; i++)
+                var lastIndex = this.dataGridView1.Columns.Count - 1;
+
+                this.dataGridView1.Columns[lastIndex].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+
+                for (var i = 1; i < this.dataGridView1.Columns.Count; i++)
                 {
-                    int colw = dataGridView1.Columns[i].Width;
-                    dataGridView1.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                    dataGridView1.Columns[i].Width = colw;
+                    var width = this.dataGridView1.Columns[i].Width;
+                    this.dataGridView1.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                    this.dataGridView1.Columns[i].Width = width;
                 }
-                dataGridView1.Columns[dataGridView1.Columns.Count - 1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+
+                this.dataGridView1.Columns[lastIndex].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
                 this.dataGridView1.Update();
             }
@@ -163,7 +190,7 @@ namespace LordsBotStatView
                 var o = row.Cells[nameof(this.colStatus)].Value;
                 row.Cells[nameof(this.colStatus)].Style.ForeColor = o.Equals("GOOD") ? Color.Green : Color.Red;
 
-                row.Cells[nameof(this.colRequired)].Value = this.report.TotalScore;
+                row.Cells[nameof(this.colRequired)].Value = this.totalScore;
                 row.Cells[nameof(this.colRequired)].Style.ForeColor = Color.DarkOrange;
 
                 o = row.Cells[nameof(this.colScore)].Value;
@@ -174,25 +201,13 @@ namespace LordsBotStatView
             }
         }
 
-        private void LoadMembersList()
-        {
-            var applicationDirectory = new DirectoryInfo(Application.ExecutablePath).Parent;
-            var membersExcelFile = Directory.EnumerateFiles(applicationDirectory?.FullName ?? ".", "*.xlsx")
-                .FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(membersExcelFile))
-            {
-                this.report?.Imbue(membersExcelFile);
-            }
-        }
-
         private void TxtPlayerName_TextChanged(object sender, EventArgs e)
         {
             try
             {
                 this.SuspendLayout();
 
-                var txt = (TextBox)sender;
+                var txt = (TextBox) sender;
                 this.bindingSource1.Filter = string.IsNullOrEmpty(txt.Text) ? null : $@"[{nameof(RenderItem.PlayerName)}] LIKE '%{txt.Text}%'";
 
                 this.dataGridView1.Update();

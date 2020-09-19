@@ -31,7 +31,7 @@ namespace LordsBotStat
 
         /// <inheritdoc />
         [Option("plain-text"
-            , HelpText = "Should the report be rendered in plain text"
+            , HelpText = "The report should be rendered in a plain text"
             , Required = false
         )]
         public bool PlainText { get; set; }
