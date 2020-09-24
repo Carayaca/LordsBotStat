@@ -24,6 +24,6 @@
         /// Gets or sets the gifts collected.
         /// </summary>
         [JsonProperty("giftsCollected")]
-        public int[] GiftsCollected { get; set; }
+        public int[] GiftsCollected { get; set; } = new int[0];
     }
 }

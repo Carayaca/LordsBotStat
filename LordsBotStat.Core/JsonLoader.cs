@@ -136,17 +136,11 @@
                 var boxes = gr.Where(box => !box.IsPurchase && box.BoxLevel >= LootLevel._2)
                     .ToArray();
 
-                var playerName = gr.Key;
-                if (string.IsNullOrEmpty(playerName))
-                {
-                    playerName = "Анонимно";
-                }
-
                 if (boxes.Any())
                 {
                     var item = new RenderItem(report)
                                    {
-                                       PlayerName = playerName,
+                                       PlayerName = gr.Key.Or("Анонимно"),
                                        Lvl2 = boxes.Count(box => box.BoxLevel == LootLevel._2),
                                        Lvl3 = boxes.Count(box => box.BoxLevel >= LootLevel._3),
                                        Paid = gr.Count(box => box.IsPurchase)

@@ -29,12 +29,12 @@
         /// Gets or sets the stat information.
         /// </summary>
         [JsonProperty("statInfo")]
-        public StatInfo StatInfo { get; set; }
+        public StatInfo StatInfo { get; set; } = new StatInfo();
 
         /// <summary>
         /// Gets or sets the box data.
         /// </summary>
         [JsonProperty("boxData")]
-        public BoxData[] BoxData { get; set; }
+        public BoxData[] BoxData { get; set; } = new BoxData[0];
     }
 }

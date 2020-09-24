@@ -1,18 +1,15 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+
+using CommandLine;
+using CommandLine.Text;
+
+using LordsBotStat.Core;
 
 using NLog;
 
 namespace LordsBotStat
 {
-    using System;
-    using System.Collections.Generic;
-
-    using CommandLine;
-    using CommandLine.Text;
-
-    using LordsBotStat.Core;
-
     /// <summary>
     /// The program.
     /// </summary>
