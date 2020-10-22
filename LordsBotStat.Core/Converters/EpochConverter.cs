@@ -24,7 +24,7 @@
             bool hasExistingValue,
             JsonSerializer serializer)
         {
-            return DateTimeOffset.FromUnixTimeSeconds((long)(reader?.Value ?? 0L)).UtcDateTime;
+            return DateTimeOffset.FromUnixTimeSeconds((long)(reader?.Value ?? 0L)).LocalDateTime;
         }
 
         private static double ConvertToUnixTimestamp(DateTime date)

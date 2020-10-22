@@ -33,6 +33,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.txtPlayerName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -72,6 +74,8 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.label4);
+            this.panel2.Controls.Add(this.label3);
             this.panel2.Controls.Add(this.txtPlayerName);
             this.panel2.Controls.Add(this.label2);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
@@ -80,6 +84,24 @@
             this.panel2.Size = new System.Drawing.Size(800, 33);
             this.panel2.TabIndex = 3;
             this.panel2.Visible = false;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(357, 7);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(38, 15);
+            this.label4.TabIndex = 3;
+            this.label4.Text = "label4";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(260, 7);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(91, 15);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Период отчета:";
             // 
             // txtPlayerName
             // 
@@ -244,6 +266,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colRequired;
         private System.Windows.Forms.DataGridViewTextBoxColumn colStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn colDebt;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
     }
 }
 

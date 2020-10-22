@@ -1,4 +1,6 @@
-﻿namespace LordsBotStat.Core
+﻿using NLog;
+
+namespace LordsBotStat.Core
 {
     using System;
     using System.Collections.Generic;
@@ -14,6 +16,8 @@
     /// </summary>
     public static class JsonLoader
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+
         private const string JsonFileMask = "guild-stats-*.json";
 
         /// <summary>
@@ -23,8 +27,10 @@
         /// <returns><see cref="Report"/>.</returns>
         public static Report LoadDir(string dirName)
         {
+            Log.Debug("Loading directory: {name}", dirName);
             if (!Directory.Exists(dirName))
             {
+                Log.Warn("Directory {name} is not exist", dirName);
                 return null;
             }
 
@@ -99,6 +105,7 @@
                 }
             }
 
+            Log.Debug("Loaded {N} file(s)", loot.Count);
             return loot;
         }
 
@@ -120,6 +127,8 @@
                 report.DateTo = interval.Max().AddDays(1).Date;
             }
 
+            Log.Debug("Report period: {min} - {max}", interval.Min(), interval.Max());
+
             var players = loot.SelectMany(p => p.BoxData)
                 .Distinct(new BoxComparer())
                 .GroupBy(box => box.PlayerName)
@@ -127,6 +136,7 @@
                     .ToArray();
 
             report.PlayersCount = players.Length;
+            Log.Debug("Report players: {N}", report.PlayersCount);
 
             IList<RenderItem> renderItems = new List<RenderItem>();
 
@@ -149,6 +159,11 @@
                     renderItems.Add(item);
                 }
             }
+
+            Log.Debug("Total counts: LVL 2: {LVL2}, LVL 3+: {LVL3}, Paid: {Paid}",
+                renderItems.Sum(p => p.Lvl2),
+                renderItems.Sum(p => p.Lvl3),
+                renderItems.Sum(p => p.Paid));
 
             report.Items = (IReadOnlyCollection<RenderItem>) renderItems;
             return report;

@@ -47,6 +47,7 @@ namespace LordsBotStatView
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.label4.Text = string.Empty; // report period
         }
 
         private static DataTable ToDataTable<T>(IEnumerable<T> items)
@@ -137,6 +138,12 @@ namespace LordsBotStatView
                 this.totalScore = report.TotalScore;
 
                 this.SuspendLayout();
+
+                var ts = report.DateTo - report.DateFrom;
+                if (ts.HasValue)
+                {
+                    this.label4.Text = $@"{report.DateFrom:d} - {report.DateTo?.AddDays(-1):d} ({ts.Value.Days} DAY(S))";
+                }
 
                 this.dataGridView1.DataSource = null;
                 this.txtPlayerName.Text = string.Empty;
