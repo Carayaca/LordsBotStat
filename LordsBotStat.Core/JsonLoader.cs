@@ -52,23 +52,6 @@ namespace LordsBotStat.Core
             public const int _3 = 2;
         }
 
-        private class BoxComparer : IEqualityComparer<BoxData>
-        {
-            public bool Equals(BoxData x, BoxData y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                if (x.GetType() != y.GetType()) return false;
-                return x.Sequence == y.Sequence;
-            }
-
-            public int GetHashCode(BoxData obj)
-            {
-                return obj.Sequence;
-            }
-        }
-
         /// <summary>
         /// Loads the json.
         /// </summary>
@@ -130,7 +113,6 @@ namespace LordsBotStat.Core
             Log.Debug("Report period: {min} - {max}", interval.Min(), interval.Max());
 
             var players = loot.SelectMany(p => p.BoxData)
-                .Distinct(new BoxComparer())
                 .GroupBy(box => box.PlayerName)
                 .OrderBy(gr => gr.Key)
                     .ToArray();
